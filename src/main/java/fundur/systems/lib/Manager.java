@@ -63,7 +63,7 @@ public class Manager {
     //TODO: salt le password
     public static SecretKey getKeyFromPwd(String password) throws NoSuchAlgorithmException, InvalidKeySpecException {
         SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
-        KeySpec spec = new PBEKeySpec(password.toCharArray(),new byte[] {0, 0, 0, 0},65536, 256);
+        KeySpec spec = new PBEKeySpec(password.toCharArray(),new byte[] {1, 3, 3, 7, 4, 2, 0, 6, 9},65536, 256);
         return new SecretKeySpec(factory.generateSecret(spec).getEncoded(), "AES");
     }
 
