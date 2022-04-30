@@ -1,8 +1,8 @@
 package fundur.systems.lib;
 
-public record DataState (
+public record EncrState(
         String algo,
-        String salt,
+        byte[] salt,
         byte[] iv
 )
 {}
