@@ -1,6 +1,7 @@
 package fundur.systems.lib;
 
 import fundur.systems.lib.local.LocalManager;
+import fundur.systems.lib.sec.EncrState;
 import fundur.systems.lib.server.ServerManager;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -17,7 +18,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Scanner;
 
-import static fundur.systems.lib.Security.*;
+import static fundur.systems.lib.sec.Security.*;
 
 public class Manager {
     private final ExceptionHandler handler;

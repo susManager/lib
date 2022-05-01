@@ -1,4 +1,4 @@
-package fundur.systems.lib;
+package fundur.systems.lib.sec;
 
 public record EncrState(
         String algo,
