@@ -68,6 +68,10 @@ public class Manager {
         );
     }
 
+    public static JSONObject getLatestFromServer() throws Exception {
+        throw new Exception("Not implemented yet!\nComing from Manager.getLatestFromServer()");
+    }
+
     public static void saveFile(String content, String path) throws IOException {
         FileWriter f = new FileWriter(path);
         f.write(content);
