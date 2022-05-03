@@ -1,6 +1,8 @@
 package fundur.systems.lib;
 
 import fundur.systems.lib.sec.EncrState;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -19,7 +21,7 @@ import java.util.Scanner;
 import static fundur.systems.lib.sec.Security.*;
 
 public class Manager {
-    public static String getDefaultPath() {
+    public static @NotNull String getDefaultPath() {
         String sep = System.getProperty("file.separator");
         if (System.getProperty("os.name").toLowerCase(Locale.ROOT).contains("windows")) {
             return "%appdata%" + sep + "susManager" + sep;
@@ -37,19 +39,19 @@ public class Manager {
             URL url = new URL("https://example.org");
             HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
-            return true;
+            //return true;
         } catch (Exception ignored) {}
         return false;
     }
 
-    public static JSONObject getJSONObject(String hashUser, String password, String path) throws Exception {
+    public static @NotNull JSONObject getJSONObject(String hashUser, String password, String path) throws Exception {
         String file = loadFile(path + "config.json");
         EncrState state = getState(new JSONObject(file).getJSONObject(hashUser));
         String content = loadFile(path + hashUser);
         return new JSONObject(decrypt(state.algo(), content, getKeyFromPwd(password, state.salt()), new IvParameterSpec(state.iv())));
     }
 
-    public static void saveJSONObject (JSONObject jsonObject, String hashUser, String password, String path) throws Exception {
+    public static void saveJSONObject (@NotNull JSONObject jsonObject, String hashUser, String password, String path) throws Exception {
         String content = jsonObject.toString();
         JSONObject config = new JSONObject(loadFile(path + "config.json")).getJSONObject(hashUser);
         EncrState state = getState(config);
@@ -57,7 +59,8 @@ public class Manager {
         saveFile(encrypted, path + hashUser);
     }
 
-    public static EncrState getState(JSONObject object) {
+    @Contract("_ -> new")
+    public static @NotNull EncrState getState(@NotNull JSONObject object) {
         return new EncrState(
             object.getString("algo"),
             serer(object.getJSONArray("salt")),
@@ -68,10 +71,10 @@ public class Manager {
     public static void saveFile(String content, String path) throws IOException {
         FileWriter f = new FileWriter(path);
         f.write(content);
-        f.flush();
+        f.close();
     }
 
-    public static String loadFile(String path) throws FileNotFoundException {
+    public static @NotNull String loadFile(String path) throws FileNotFoundException {
         File f = new File(path);
         Scanner scanner = new Scanner(f);
         StringBuilder res = new StringBuilder();
@@ -79,7 +82,7 @@ public class Manager {
         return res.toString();
     }
 
-    public static byte[] serer(JSONArray arr) {
+    public static byte @NotNull [] serer(@NotNull JSONArray arr) {
         List<Byte> byteList = new ArrayList<>();
         int temp;
         for (Object o : arr) {
