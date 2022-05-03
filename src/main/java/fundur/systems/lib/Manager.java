@@ -68,8 +68,9 @@ public class Manager {
         );
     }
 
-    public static JSONObject getLatestFromServer() throws Exception {
-        throw new Exception("Not implemented yet!\nComing from Manager.getLatestFromServer()");
+    @Deprecated
+    public static JSONObject getLatestFromServer() {
+        return getNewerDummyJSON();
     }
 
     public static void saveFile(String content, String path) throws IOException {
@@ -100,10 +101,8 @@ public class Manager {
         return res;
     }
 
-    public static void main(String[] args) {
-        try {
-            saveJSONObject(
-                new JSONObject("""
+    public static JSONObject getDefaultDummyJSON() {
+        return new JSONObject("""
                         { "passwords": {
                             "gmail": {
                                 "name": "gmail",
@@ -113,7 +112,27 @@ public class Manager {
                             }
                           }
                         }
-                        """),
+                        """);
+    }
+
+    public static JSONObject getNewerDummyJSON() {
+        return new JSONObject("""
+                        { "passwords": {
+                            "gmail": {
+                                "name": "gmail",
+                                "usr": "cockUser@gmail.com",
+                                "pwd": "cockAndBall",
+                                "timestamp": 1651574187604
+                            }
+                          }
+                        }
+                        """);
+    }
+
+    public static void main(String[] args) {
+        try {
+            saveJSONObject(
+                getDefaultDummyJSON(),
                 hash("fridolin"),
                 "iHaveAids69",
                 ""
