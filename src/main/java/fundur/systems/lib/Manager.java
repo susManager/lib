@@ -13,10 +13,7 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Scanner;
+import java.util.*;
 
 import static fundur.systems.lib.sec.Security.*;
 
@@ -66,6 +63,37 @@ public class Manager {
             serer(object.getJSONArray("salt")),
             serer(object.getJSONArray("iv"))
         );
+    }
+
+    //TODO: test me
+    public static List<Entry> merge(JSONObject a, JSONObject b) {
+        JSONObject jsonA = a.getJSONObject("passwords");
+        var iterA = jsonA.keys();
+        Map<String, Entry> map = new HashMap<>();
+
+        JSONObject jsonB = b.getJSONObject("passwords");
+        var iterB = jsonB.keys();
+        while (iterB.hasNext()) {
+            String key = iterB.next();
+            JSONObject curr = jsonA.getJSONObject(key);
+            map.put(key, new Entry(key,
+                    curr.getString("usr"),
+                    curr.getString("pwd"),
+                    curr.getLong("timestamp")));
+        }
+
+        while (iterA.hasNext()) {
+            String key = iterA.next();
+            JSONObject curr = jsonA.getJSONObject(key);
+
+            if (!map.containsKey(key) || curr.getLong("timestamp") > map.get(key).timestamp()) {
+                map.put(key, new Entry(key,
+                        curr.getString("usr"),
+                        curr.getString("pwd"),
+                        curr.getLong("timestamp")));
+            }
+        }
+        return new ArrayList<>(map.values());
     }
 
     @Deprecated
@@ -120,8 +148,8 @@ public class Manager {
                         { "passwords": {
                             "gmail": {
                                 "name": "gmail",
-                                "usr": "cockUser@gmail.com",
-                                "pwd": "cockAndBall",
+                                "usr": "NEWcockUser@gmail.com",
+                                "pwd": "NEWcockAndBall",
                                 "timestamp": 1651574187604
                             }
                           }
