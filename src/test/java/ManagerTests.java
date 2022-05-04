@@ -3,8 +3,9 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static fundur.systems.lib.Dummy.getDefaultDummyJSON;
+import static fundur.systems.lib.Dummy.getNewerDummyJSON;
 import static fundur.systems.lib.Manager.*;
-import static fundur.systems.lib.Manager.getDefaultDummyJSON;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ManagerTests {
