@@ -48,4 +48,14 @@ public class Entry {
         this.timestamp = timestamp;
         return this;
     }
+
+    @Override
+    public String toString() {
+        return "Entry{" +
+                "name='" + name + '\'' +
+                ", usr='" + usr + '\'' +
+                ", pwd='" + pwd + '\'' +
+                ", timestamp=" + timestamp +
+                '}';
+    }
 }

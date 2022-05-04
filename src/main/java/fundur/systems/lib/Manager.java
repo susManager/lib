@@ -65,7 +65,6 @@ public class Manager {
         );
     }
 
-    //TODO: test me
     public static List<Entry> merge(JSONObject a, JSONObject b) {
         JSONObject jsonA = a.getJSONObject("passwords");
         var iterA = jsonA.keys();
@@ -75,7 +74,7 @@ public class Manager {
         var iterB = jsonB.keys();
         while (iterB.hasNext()) {
             String key = iterB.next();
-            JSONObject curr = jsonA.getJSONObject(key);
+            JSONObject curr = jsonB.getJSONObject(key);
             map.put(key, new Entry(key,
                     curr.getString("usr"),
                     curr.getString("pwd"),
@@ -170,5 +169,7 @@ public class Manager {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        List<Entry> list = merge(getNewerDummyJSON(), getDefaultDummyJSON());
+        System.out.println(list.get(0).toString());
     }
 }
