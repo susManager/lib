@@ -82,8 +82,22 @@ public class Manager {
 
     public static void pushLatestToServer (String nameHash, List<Entry> list) {
 
+    }
 
-
+    public static JSONObject list2JSONObject (List<Entry> list) {
+        JSONArray arr = new JSONArray();
+        for (Entry entry : list)
+            arr.put(new JSONObject(String.format("""
+                    {   "name": "%s",
+                        "usr": "%s",
+                        "pwd": "%s",
+                        "timestamp": %d
+                    }
+                    """,
+                entry.name(), entry.usr(), entry.pwd(), entry.timestamp())));
+        JSONObject result = new JSONObject();
+        result.put("passwords", arr);
+        return result;
     }
 
     public static void main(String[] args) {
@@ -101,5 +115,6 @@ public class Manager {
         }
         List<Entry> list = merge(getNewerDummyJSON(), getDefaultDummyJSON());
         System.out.println(list.get(0).toString());
+        System.out.println(list2JSONObject(merge(getNewerDummyJSON(), getDefaultDummyJSON())));
     }
 }
