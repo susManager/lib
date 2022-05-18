@@ -1,8 +1,14 @@
 package fundur.systems.lib;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import javax.net.ssl.HttpsURLConnection;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
 
@@ -13,7 +19,12 @@ import static fundur.systems.lib.FileManager.saveJSONObject;
 import static fundur.systems.lib.sec.Security.*;
 
 public class Manager {
-    public static final String URL = "https://example.org";
+    public static final String exampleURL = "https://example.org";
+    public static String serverURL = "http://susmanager.fundur.systems:1337/";
+
+    public static void setServerURL (String newUrl) {
+        serverURL = newUrl;
+    }
 
     public static boolean testIO() {
         return true;
@@ -21,7 +32,7 @@ public class Manager {
 
     public static boolean testNet() {
         try {
-            URL url = new URL(URL);
+            URL url = new URL(exampleURL);
             HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
             //return true;
@@ -30,25 +41,22 @@ public class Manager {
     }
 
     public static List<Entry> merge(JSONObject a, JSONObject b) {
-        JSONObject jsonA = a.getJSONObject("passwords");
-        var iterA = jsonA.keys();
         Map<String, Entry> map = new HashMap<>();
 
-        JSONObject jsonB = b.getJSONObject("passwords");
-        var iterB = jsonB.keys();
-        while (iterB.hasNext()) {
-            String key = iterB.next();
-            JSONObject curr = jsonB.getJSONObject(key);
+        JSONArray jsonA = a.getJSONArray("passwords");
+        for (int i = 0; i < jsonA.length(); i++) {
+            JSONObject curr = (JSONObject) jsonA.get(i);
+            var key = curr.getString("name");
             map.put(key, new Entry(key,
                     curr.getString("usr"),
                     curr.getString("pwd"),
                     curr.getLong("timestamp")));
         }
 
-        while (iterA.hasNext()) {
-            String key = iterA.next();
-            JSONObject curr = jsonA.getJSONObject(key);
-
+        JSONArray jsonB = b.getJSONArray("passwords");
+        for (int i = 0; i < jsonB.length(); i++) {
+            JSONObject curr = (JSONObject) jsonB.get(i);
+            var key = curr.getString("name");
             if (!map.containsKey(key) || curr.getLong("timestamp") > map.get(key).timestamp()) {
                 map.put(key, new Entry(key,
                         curr.getString("usr"),
@@ -59,9 +67,21 @@ public class Manager {
         return new ArrayList<>(map.values());
     }
 
-    @Deprecated
-    public static JSONObject getLatestFromServer() {
-        return getNewerDummyJSON();
+    public static JSONObject getLatestFromServer(String nameHash) throws IOException {
+        URL server = new URL("http://susmanager.fundur.systems:1337/data/" + nameHash);
+        HttpURLConnection conn = (HttpURLConnection) server.openConnection();
+        conn.setRequestMethod("GET");
+        StringBuilder output = new StringBuilder();
+        var br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
+        String line = "";
+        while ((line = br.readLine()) != null  )
+            output.append(line);
+
+        return new JSONObject(output.toString());
+    }
+
+    public static void pushLatestToServer (String nameHash, List<Entry> list) {
+
     }
 
     public static void main(String[] args) {
