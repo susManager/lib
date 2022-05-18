@@ -82,6 +82,8 @@ public class Manager {
 
     public static void pushLatestToServer (String nameHash, List<Entry> list) {
 
+
+
     }
 
     public static void main(String[] args) {
