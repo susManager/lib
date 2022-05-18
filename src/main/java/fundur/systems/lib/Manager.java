@@ -23,7 +23,6 @@ import static fundur.systems.lib.Dummy.getDefaultDummyJSON;
 import static fundur.systems.lib.Dummy.getNewerDummyJSON;
 import static fundur.systems.lib.FileManager.*;
 import static fundur.systems.lib.sec.Security.*;
-import static fundur.systems.lib.sec.Security.encrypt;
 
 public class Manager {
     public static final String exampleURL = "https://example.org";
@@ -74,17 +73,21 @@ public class Manager {
         return new ArrayList<>(map.values());
     }
 
-    public static JSONObject getLatestFromServer(String nameHash) throws IOException {
+    public static String getLatestRawFromServer(String nameHash) throws IOException {
         URL server = new URL(serverURL + "data/" +  nameHash);
         HttpURLConnection conn = (HttpURLConnection) server.openConnection();
         conn.setRequestMethod("GET");
-        StringBuilder output = new StringBuilder();
-        var br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
-        String line = "";
-        while ((line = br.readLine()) != null  )
-            output.append(line);
 
-        return new JSONObject(output.toString());
+        var br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
+
+        return br.lines().reduce((x, y) -> x + y).get();
+    }
+
+    public static JSONObject getLatestFromServer(String hashUser, String password, String path) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException {
+        String encrypted = getLatestRawFromServer(hashUser);
+        String file = loadFile(path + "config.json");
+        EncrState state = getEncrStateFromJson(new JSONObject(file).getJSONObject(hashUser));
+        return new JSONObject(decrypt(state.algo(), encrypted, getKeyFromPwd(password, state.salt()), new IvParameterSpec(state.iv())));
     }
 
     public static String encrypt(JSONObject jsonObject, String path, String hashUser, String password ) throws FileNotFoundException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException {
@@ -106,14 +109,12 @@ public class Manager {
                     """, encrypted).getBytes());
         }
 
-        StringBuilder output = new StringBuilder();
-        var br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
-        String line = "";
-        while ((line = br.readLine()) != null)
-            output.append(line);
 
-        System.out.println(output);
-        return output.toString();
+        var br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
+        String out = br.lines().reduce((x, y) -> x + y).get();
+
+        System.out.println(out);
+        return out;
     }
 
     public static JSONObject list2JSONObject (List<Entry> list) {
@@ -132,6 +133,20 @@ public class Manager {
         return result;
     }
 
+    @Deprecated
+    public static List<Entry> JSONObject2List(JSONObject json) {
+        List<Entry> result = new ArrayList<>();
+        JSONArray jsonA = json.getJSONArray("passwords");
+        for (int i = 0; i < jsonA.length(); i++) {
+            JSONObject curr = (JSONObject) jsonA.get(i);
+             result.add(new Entry(curr.getString("name"),
+                    curr.getString("usr"),
+                    curr.getString("pwd"),
+                    curr.getLong("timestamp")));
+        }
+        return result;
+    }
+
     public static void main(String[] args) throws Exception {
         try {
             saveJSONObjectToFile(
@@ -145,12 +160,7 @@ public class Manager {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        List<Entry> list = merge(getNewerDummyJSON(), getDefaultDummyJSON());
-
         postLatestToServer(hash("fridolin"), Manager.encrypt(getDefaultDummyJSON(), "", hash("fridolin"), "iHaveAids69"));
-
-        System.out.println(list.get(0).toString());
-        System.out.println(list2JSONObject(merge(getNewerDummyJSON(), getDefaultDummyJSON())));
-        System.out.println(hash("fridolin"));
+        System.out.println(getLatestFromServer(hash("fridolin"), "iHaveAids69", ""));
     }
 }
