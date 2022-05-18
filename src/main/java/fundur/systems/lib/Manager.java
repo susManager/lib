@@ -8,14 +8,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
 
 import static fundur.systems.lib.Dummy.getDefaultDummyJSON;
 import static fundur.systems.lib.Dummy.getNewerDummyJSON;
-import static fundur.systems.lib.FileManager.getJSONObject;
-import static fundur.systems.lib.FileManager.saveJSONObject;
+import static fundur.systems.lib.FileManager.getJSONObjectFromFile;
+import static fundur.systems.lib.FileManager.saveJSONObjectToFile;
 import static fundur.systems.lib.sec.Security.*;
 
 public class Manager {
@@ -80,7 +79,7 @@ public class Manager {
         return new JSONObject(output.toString());
     }
 
-    public static void pushLatestToServer (String nameHash, List<Entry> list) {
+    public static void postLatestToServer (String nameHash, List<Entry> list) {
 
     }
 
@@ -102,14 +101,14 @@ public class Manager {
 
     public static void main(String[] args) {
         try {
-            saveJSONObject(
+            saveJSONObjectToFile(
                 getDefaultDummyJSON(),
                 hash("fridolin"),
                 "iHaveAids69",
                 ""
             );
 
-            System.out.println(getJSONObject(hash("fridolin"), "iHaveAids69", ""));
+            System.out.println(getJSONObjectFromFile(hash("fridolin"), "iHaveAids69", ""));
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -20,27 +20,27 @@ import static fundur.systems.lib.sec.Security.*;
 import static fundur.systems.lib.sec.Security.getKeyFromPwd;
 
 public class FileManager {
-    public static @NotNull JSONObject getJSONObject(String hashUser, String password, String path) throws Exception {
+    public static @NotNull JSONObject getJSONObjectFromFile(String hashUser, String password, String path) throws Exception {
         String file = loadFile(path + "config.json");
-        EncrState state = getState(new JSONObject(file).getJSONObject(hashUser));
+        EncrState state = getEncrStateFromJson(new JSONObject(file).getJSONObject(hashUser));
         String content = loadFile(path + hashUser);
         return new JSONObject(decrypt(state.algo(), content, getKeyFromPwd(password, state.salt()), new IvParameterSpec(state.iv())));
     }
 
-    public static void saveJSONObject (@NotNull JSONObject jsonObject, String hashUser, String password, String path) throws Exception {
+    public static void saveJSONObjectToFile(@NotNull JSONObject jsonObject, String hashUser, String password, String path) throws Exception {
         String content = jsonObject.toString();
         JSONObject config = new JSONObject(loadFile(path + "config.json")).getJSONObject(hashUser);
-        EncrState state = getState(config);
+        EncrState state = getEncrStateFromJson(config);
         String encrypted = encrypt(state.algo(), content, getKeyFromPwd(password, state.salt()), new IvParameterSpec(state.iv()));
         saveFile(encrypted, path + hashUser);
     }
 
     @Contract("_ -> new")
-    public static @NotNull EncrState getState(@NotNull JSONObject object) {
+    public static @NotNull EncrState getEncrStateFromJson(@NotNull JSONObject object) {
         return new EncrState(
                 object.getString("algo"),
-                serer(object.getJSONArray("salt")),
-                serer(object.getJSONArray("iv"))
+                JSONArrayToByteArray(object.getJSONArray("salt")),
+                JSONArrayToByteArray(object.getJSONArray("iv"))
         );
     }
 
@@ -58,7 +58,7 @@ public class FileManager {
         return res.toString();
     }
 
-    public static byte @NotNull [] serer(@NotNull JSONArray arr) {
+    public static byte @NotNull [] JSONArrayToByteArray(@NotNull JSONArray arr) {
         List<Byte> byteList = new ArrayList<>();
         int temp;
         for (Object o : arr) {
