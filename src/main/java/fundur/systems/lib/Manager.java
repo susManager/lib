@@ -1,25 +1,33 @@
 package fundur.systems.lib;
 
+import fundur.systems.lib.sec.EncrState;
+import fundur.systems.lib.sec.Security;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.IvParameterSpec;
 import javax.net.ssl.HttpsURLConnection;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.*;
 
 import static fundur.systems.lib.Dummy.getDefaultDummyJSON;
 import static fundur.systems.lib.Dummy.getNewerDummyJSON;
-import static fundur.systems.lib.FileManager.getJSONObjectFromFile;
-import static fundur.systems.lib.FileManager.saveJSONObjectToFile;
+import static fundur.systems.lib.FileManager.*;
 import static fundur.systems.lib.sec.Security.*;
+import static fundur.systems.lib.sec.Security.encrypt;
 
 public class Manager {
     public static final String exampleURL = "https://example.org";
-    public static String serverURL = "http://susmanager.fundur.systems:1337/";
+    public static String serverURL = "http://127.0.0.1:8000/"; //best server imo
 
     public static void setServerURL (String newUrl) {
         serverURL = newUrl;
@@ -67,7 +75,7 @@ public class Manager {
     }
 
     public static JSONObject getLatestFromServer(String nameHash) throws IOException {
-        URL server = new URL("http://susmanager.fundur.systems:1337/data/" + nameHash);
+        URL server = new URL(serverURL + "data/" +  nameHash);
         HttpURLConnection conn = (HttpURLConnection) server.openConnection();
         conn.setRequestMethod("GET");
         StringBuilder output = new StringBuilder();
@@ -79,8 +87,33 @@ public class Manager {
         return new JSONObject(output.toString());
     }
 
-    public static void postLatestToServer (String nameHash, List<Entry> list) {
+    public static String encrypt(JSONObject jsonObject, String path, String hashUser, String password ) throws FileNotFoundException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException {
+        String content = jsonObject.toString();
+        JSONObject config = new JSONObject(loadFile(path + "config.json")).getJSONObject(hashUser);
+        EncrState state = getEncrStateFromJson(config);
+        return Security.encrypt(state.algo(), content, getKeyFromPwd(password, state.salt()), new IvParameterSpec(state.iv()));
+    }
 
+    public static String postLatestToServer (String nameHash, String encrypted) throws IOException {
+
+        URL server = new URL(serverURL + "data/" +  nameHash);
+        HttpURLConnection conn = (HttpURLConnection) server.openConnection();
+        conn.setRequestMethod("POST");
+        conn.setDoOutput(true);
+        try (OutputStream os = conn.getOutputStream()) {
+            os.write(String.format("""
+                    {"content": "%s"}
+                    """, encrypted).getBytes());
+        }
+
+        StringBuilder output = new StringBuilder();
+        var br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
+        String line = "";
+        while ((line = br.readLine()) != null)
+            output.append(line);
+
+        System.out.println(output);
+        return output.toString();
     }
 
     public static JSONObject list2JSONObject (List<Entry> list) {
@@ -99,7 +132,7 @@ public class Manager {
         return result;
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         try {
             saveJSONObjectToFile(
                 getDefaultDummyJSON(),
@@ -113,7 +146,11 @@ public class Manager {
             e.printStackTrace();
         }
         List<Entry> list = merge(getNewerDummyJSON(), getDefaultDummyJSON());
+
+        postLatestToServer(hash("fridolin"), Manager.encrypt(getDefaultDummyJSON(), "", hash("fridolin"), "iHaveAids69"));
+
         System.out.println(list.get(0).toString());
         System.out.println(list2JSONObject(merge(getNewerDummyJSON(), getDefaultDummyJSON())));
+        System.out.println(hash("fridolin"));
     }
 }
