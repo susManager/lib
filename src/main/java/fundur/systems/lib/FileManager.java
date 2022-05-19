@@ -20,6 +20,9 @@ import static fundur.systems.lib.sec.Security.*;
 import static fundur.systems.lib.sec.Security.getKeyFromPwd;
 
 public class FileManager {
+    public static boolean testIO() {
+        return true;
+    }
     public static @NotNull JSONObject getJSONObjectFromFile(String hashUser, String password, String path) throws Exception {
         String file = loadFile(path + "config.json");
         EncrState state = getEncrStateFromJson(new JSONObject(file).getJSONObject(hashUser));
