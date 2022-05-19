@@ -100,9 +100,8 @@ public class Manager {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        postLatestToServer("fridolin", Manager.encrypt(getDefaultDummyJSON(), "", hash("fridolin"), "iHaveAids69"));
-        System.out.println(getLatestFromServer("fridolin", "iHaveAids69", ""));
-        System.out.println(postEncrStateToServer("fridolin", "{\"content\": \"bruder\"}"));
-        System.out.println(getEncrStateFromServer("fridolin"));
+        postLatestToServer(hash("fridolin"), Manager.encrypt(getDefaultDummyJSON(), "", hash("fridolin"), "iHaveAids69"));
+        String file = loadFile("config.json");
+        postEncrStateToServer(hash("fridolin"), getEncrStateFromJson(new JSONObject(file).getJSONObject(hash("fridolin"))).toString());
     }
 }
