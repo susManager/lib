@@ -73,6 +73,20 @@ public class Manager {
         return new ArrayList<>(map.values());
     }
 
+    public static String postEncrStateToServer(String nameHash) {
+        return "hello world";
+    }
+
+    public static String getEncrStateFromServer(String nameHash) throws IOException {
+        URL server = new URL(serverURL + "encrstate/" +  nameHash);
+        HttpURLConnection conn = (HttpURLConnection) server.openConnection();
+        conn.setRequestMethod("GET");
+
+        var br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
+
+        return br.lines().reduce((x, y) -> x + y).get();
+    }
+
     public static String getLatestRawFromServer(String nameHash) throws IOException {
         URL server = new URL(serverURL + "data/" +  nameHash);
         HttpURLConnection conn = (HttpURLConnection) server.openConnection();
