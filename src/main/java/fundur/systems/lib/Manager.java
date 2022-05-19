@@ -20,7 +20,6 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.*;
 
 import static fundur.systems.lib.Dummy.getDefaultDummyJSON;
-import static fundur.systems.lib.Dummy.getNewerDummyJSON;
 import static fundur.systems.lib.FileManager.*;
 import static fundur.systems.lib.sec.Security.*;
 
@@ -73,18 +72,38 @@ public class Manager {
         return new ArrayList<>(map.values());
     }
 
-    public static String postEncrStateToServer(String nameHash) {
-        return "hello world";
+    public static String postEncrStateToServer(String user, String stringified) throws IOException {
+        return postRawEncrStateToServer(user, Base64.getEncoder().encodeToString(stringified.getBytes()));
+    }
+    public static String postRawEncrStateToServer(String user, String encoded) throws IOException {
+        String nameHash = hash(user);
+        URL server = new URL(serverURL + "encrstate/" +  nameHash);
+        HttpURLConnection conn = (HttpURLConnection) server.openConnection();
+        conn.setRequestMethod("POST");
+        conn.setDoOutput(true);
+        try (OutputStream os = conn.getOutputStream()) {
+            os.write(String.format("""
+                    {"content": "%s"}
+                    """, encoded).getBytes());
+        }
+
+
+        var br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
+        String out = br.lines().reduce((x, y) -> x + y).get();
+
+        System.out.println(out);
+        return out;
     }
 
-    public static String getEncrStateFromServer(String nameHash) throws IOException {
+    public static String getEncrStateFromServer(String user) throws IOException {
+        String nameHash = hash(user);
         URL server = new URL(serverURL + "encrstate/" +  nameHash);
         HttpURLConnection conn = (HttpURLConnection) server.openConnection();
         conn.setRequestMethod("GET");
 
         var br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
 
-        return br.lines().reduce((x, y) -> x + y).get();
+        return new String(Base64.getDecoder().decode(br.lines().reduce((x, y) -> x + y).get()));
     }
 
     public static String getLatestRawFromServer(String nameHash) throws IOException {
@@ -97,7 +116,8 @@ public class Manager {
         return br.lines().reduce((x, y) -> x + y).get();
     }
 
-    public static JSONObject getLatestFromServer(String hashUser, String password, String path) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException {
+    public static JSONObject getLatestFromServer(String user, String password, String path) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException {
+        String hashUser = hash(user);
         String encrypted = getLatestRawFromServer(hashUser);
         String file = loadFile(path + "config.json");
         EncrState state = getEncrStateFromJson(new JSONObject(file).getJSONObject(hashUser));
@@ -111,8 +131,8 @@ public class Manager {
         return Security.encrypt(state.algo(), content, getKeyFromPwd(password, state.salt()), new IvParameterSpec(state.iv()));
     }
 
-    public static String postLatestToServer (String nameHash, String encrypted) throws IOException {
-
+    public static String postLatestToServer (String user, String encrypted) throws IOException {
+        String nameHash = hash(user);
         URL server = new URL(serverURL + "data/" +  nameHash);
         HttpURLConnection conn = (HttpURLConnection) server.openConnection();
         conn.setRequestMethod("POST");
@@ -174,7 +194,9 @@ public class Manager {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        postLatestToServer(hash("fridolin"), Manager.encrypt(getDefaultDummyJSON(), "", hash("fridolin"), "iHaveAids69"));
-        System.out.println(getLatestFromServer(hash("fridolin"), "iHaveAids69", ""));
+        postLatestToServer("fridolin", Manager.encrypt(getDefaultDummyJSON(), "", hash("fridolin"), "iHaveAids69"));
+        System.out.println(getLatestFromServer("fridolin", "iHaveAids69", ""));
+        System.out.println(postEncrStateToServer("fridolin", "{\"content\": \"bruder\"}"));
+        System.out.println(getEncrStateFromServer("fridolin"));
     }
 }
