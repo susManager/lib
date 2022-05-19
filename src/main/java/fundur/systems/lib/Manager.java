@@ -91,7 +91,7 @@ public class Manager {
         try {
             saveJSONObjectToFile(
                 getDefaultDummyJSON(),
-                hash("fridolin"),
+                "fridolin",
                 "iHaveAids69",
                 ""
             );

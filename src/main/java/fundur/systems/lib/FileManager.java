@@ -31,7 +31,8 @@ public class FileManager {
         return new JSONObject(decrypt(state.algo(), content, getKeyFromPwd(password, state.salt()), new IvParameterSpec(state.iv())));
     }
 
-    public static void saveJSONObjectToFile(@NotNull JSONObject jsonObject, String hashUser, String password, String path) throws Exception {
+    public static void saveJSONObjectToFile(@NotNull JSONObject jsonObject, String user, String password, String path) throws Exception {
+        String hashUser = hash(user);
         String content = jsonObject.toString();
         JSONObject config = new JSONObject(loadFile(path + "config.json")).getJSONObject(hashUser);
         EncrState state = getEncrStateFromJson(config);
