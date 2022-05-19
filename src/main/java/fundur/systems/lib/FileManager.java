@@ -21,7 +21,8 @@ import static fundur.systems.lib.sec.Security.getKeyFromPwd;
 
 public class FileManager {
     public static boolean testIO() {
-        return true;
+        File f = new File("config.json");
+        return f.canRead() && f.canWrite();
     }
     public static @NotNull JSONObject getJSONObjectFromFile(String hashUser, String password, String path) throws Exception {
         String file = loadFile(path + "config.json");
