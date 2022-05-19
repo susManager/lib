@@ -1,8 +1,6 @@
 package fundur.systems.lib;
 
 import fundur.systems.lib.sec.EncrState;
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -24,14 +22,14 @@ public class FileManager {
         File f = new File("config.json");
         return f.canRead() && f.canWrite();
     }
-    public static @NotNull JSONObject getJSONObjectFromFile(String hashUser, String password, String path) throws Exception {
+    public static JSONObject getJSONObjectFromFile(String hashUser, String password, String path) throws Exception {
         String file = loadFile(path + "config.json");
         EncrState state = getEncrStateFromJson(new JSONObject(file).getJSONObject(hashUser));
         String content = loadFile(path + hashUser);
         return new JSONObject(decrypt(state.algo(), content, getKeyFromPwd(password, state.salt()), new IvParameterSpec(state.iv())));
     }
 
-    public static void saveJSONObjectToFile(@NotNull JSONObject jsonObject, String user, String password, String path) throws Exception {
+    public static void saveJSONObjectToFile(JSONObject jsonObject, String user, String password, String path) throws Exception {
         String hashUser = hash(user);
         String content = jsonObject.toString();
         JSONObject config = new JSONObject(loadFile(path + "config.json")).getJSONObject(hashUser);
@@ -40,8 +38,7 @@ public class FileManager {
         saveFile(encrypted, path + hashUser);
     }
 
-    @Contract("_ -> new")
-    public static @NotNull EncrState getEncrStateFromJson(@NotNull JSONObject object) {
+    public static EncrState getEncrStateFromJson(JSONObject object) {
         return new EncrState(
                 object.getString("algo"),
                 JSONArrayToByteArray(object.getJSONArray("salt")),
@@ -55,7 +52,7 @@ public class FileManager {
         f.close();
     }
 
-    public static @NotNull String loadFile(String path) throws FileNotFoundException {
+    public static String loadFile(String path) throws FileNotFoundException {
         File f = new File(path);
         Scanner scanner = new Scanner(f);
         StringBuilder res = new StringBuilder();
@@ -63,7 +60,7 @@ public class FileManager {
         return res.toString();
     }
 
-    public static byte @NotNull [] JSONArrayToByteArray(@NotNull JSONArray arr) {
+    public static byte [] JSONArrayToByteArray(JSONArray arr) {
         List<Byte> byteList = new ArrayList<>();
         int temp;
         for (Object o : arr) {
