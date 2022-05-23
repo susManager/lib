@@ -32,6 +32,7 @@ public class Manager {
             map.put(key, new Entry(key,
                     curr.getString("usr"),
                     curr.getString("pwd"),
+                    curr.getString("notes"),
                     curr.getLong("timestamp")));
         }
 
@@ -43,6 +44,7 @@ public class Manager {
                 map.put(key, new Entry(key,
                         curr.getString("usr"),
                         curr.getString("pwd"),
+                        curr.getString("notes"),
                         curr.getLong("timestamp")));
             }
         }
@@ -82,6 +84,7 @@ public class Manager {
              result.add(new Entry(curr.getString("name"),
                     curr.getString("usr"),
                     curr.getString("pwd"),
+                    curr.getString("notes"),
                     curr.getLong("timestamp")));
         }
         return result;

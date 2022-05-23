@@ -4,12 +4,16 @@ public class Entry {
     private String name;
     private String usr;
     private String pwd;
+
+    private String notes;
+
     private long timestamp;
 
-    public Entry(String name, String usr, String pwd, long timestamp) {
+    public Entry(String name, String usr, String pwd, String notes, long timestamp) {
         this.name = name;
         this.usr = usr;
         this.pwd = pwd;
+        this.notes = notes;
         this.timestamp = timestamp;
     }
 
@@ -37,6 +41,15 @@ public class Entry {
 
     public Entry setPwd(String pwd) {
         this.pwd = pwd;
+        return this;
+    }
+
+    public String notes() {
+        return notes;
+    }
+
+    public Entry setNotes(String notes) {
+        this.notes = notes;
         return this;
     }
 
