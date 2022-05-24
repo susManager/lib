@@ -64,8 +64,8 @@ public class NetManager {
         return out;
     }
 
-    public static String getEncrStateFromServer(String user) throws IOException {
-        return getRawFromServer(hash(user), "encrstate");
+    public static EncrState getEncrStateFromServer(String user) throws IOException {
+        return getEncrStateFromJson(new JSONObject(getRawFromServer(hash(user), "encrstate")));
     }
 
     public static String getLatestRawFromServer(String user) throws IOException {
