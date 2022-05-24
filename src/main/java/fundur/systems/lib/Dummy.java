@@ -40,6 +40,13 @@ public class Dummy {
                 		"pwd": "googlePassword",
                 		"notes": "google notes",
                 		"timestamp": 1651574125604
+                	},
+                	{
+                	    "name": "Leddit",
+                		"usr": "ledit@gmail.com",
+                		"pwd": "ledit pwd",
+                		"notes": "ledit notes",
+                		"timestamp": 1651574125604
                 	}
                 	]
                 }
@@ -53,6 +60,7 @@ public class Dummy {
                 		"name": "gmail",
                 		"usr": "NEWcockUser@gmail.comm",
                 		"pwd": "NEWcockAndBall",
+                		"notes": "bruhv",
                 		"timestamp": 1651574187604
                 	}]
                 }
