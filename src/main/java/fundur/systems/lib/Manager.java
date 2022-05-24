@@ -66,10 +66,11 @@ public class Manager {
                     {   "name": "%s",
                         "usr": "%s",
                         "pwd": "%s",
+                        "notes": "%s",
                         "timestamp": %d
                     }
                     """,
-                entry.name(), entry.usr(), entry.pwd(), entry.timestamp())));
+                entry.name(), entry.usr(), entry.pwd(), entry.notes(), entry.timestamp())));
         JSONObject result = new JSONObject();
         result.put("passwords", arr);
         return result;
