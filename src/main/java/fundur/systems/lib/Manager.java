@@ -64,7 +64,7 @@ public class Manager {
     }
 
     public static List<Entry> decrypt(String user, String pwd) throws IOException, InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, InvalidKeySpecException, BadPaddingException, InvalidKeyException {
-       return Manager.JSONObject2List(NetManager.getLatestFromServer(user, pwd, getEncrStateFromServer(user));
+       return Manager.JSONObject2List(NetManager.getLatestFromServer(user, pwd, getEncrStateFromServer(user)));
     }
 
     public static JSONObject list2JSONObject (List<Entry> list) {
