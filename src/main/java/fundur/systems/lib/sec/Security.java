@@ -8,6 +8,7 @@ import java.math.BigInteger;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
+import java.util.Arrays;
 import java.util.Base64;
 
 public final class Security {
@@ -30,7 +31,7 @@ public final class Security {
         Cipher cipher = Cipher.getInstance(algorithm);
         cipher.init(Cipher.ENCRYPT_MODE, key, iv);
         byte[] encrText = cipher.doFinal(input.getBytes());
-        return Base64.getEncoder().encodeToString(encrText);
+        return Encoder.encode(encrText);
     }
 
     public static String decrypt(String algorithm, String cipherText, SecretKey key, IvParameterSpec iv) throws
@@ -38,9 +39,9 @@ public final class Security {
             InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
         Cipher cipher = Cipher.getInstance(algorithm);
         cipher.init(Cipher.DECRYPT_MODE, key, iv);
-        String s = new String(Base64.getDecoder().decode(cipherText));
+        String s = new String(Encoder.decode(cipherText));
         int i = 0;
-        byte[] decrText = cipher.doFinal(Base64.getDecoder().decode(cipherText));
+        byte[] decrText = cipher.doFinal(Encoder.decode(cipherText));
         return new String(decrText);
     }
 

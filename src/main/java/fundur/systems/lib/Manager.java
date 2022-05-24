@@ -53,11 +53,19 @@ public class Manager {
 
     public static String encrypt(JSONObject jsonObject, String path, String hashUser, String password ) throws FileNotFoundException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException {
         String content = jsonObject.toString();
-        JSONObject config = new JSONObject(loadFile(path + "config.json")).getJSONObject(hashUser);
+        JSONObject config = new JSONObject(loadFile(path + "config.json"));
         EncrState state = getEncrStateFromJson(config);
         return Security.encrypt(state.algo(), content, getKeyFromPwd(password, state.salt()), new IvParameterSpec(state.iv()));
     }
 
+    public static String encrypt(JSONObject jsonObject, String password, EncrState state) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException {
+        String content = jsonObject.toString();
+        return Security.encrypt(state.algo(), content, getKeyFromPwd(password, state.salt()), new IvParameterSpec(state.iv()));
+    }
+
+    public static List<Entry> decrypt(String user, String pwd) throws IOException, InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, InvalidKeySpecException, BadPaddingException, InvalidKeyException {
+       return Manager.JSONObject2List(NetManager.getLatestFromServer(user, pwd, getEncrStateFromServer(user));
+    }
 
     public static JSONObject list2JSONObject (List<Entry> list) {
         JSONArray arr = new JSONArray();
@@ -76,7 +84,6 @@ public class Manager {
         return result;
     }
 
-    @Deprecated
     public static List<Entry> JSONObject2List(JSONObject json) {
         List<Entry> result = new ArrayList<>();
         JSONArray jsonA = json.getJSONArray("passwords");
@@ -104,8 +111,11 @@ public class Manager {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        postLatestToServer(hash("fridolin"), Manager.encrypt(getDefaultDummyJSON(), "", hash("fridolin"), "iHaveAids69"));
+        postLatestToServer("fridolin", Manager.encrypt(getDefaultDummyJSON(), "", hash("fridolin"), "iHaveAids69"));
         String file = loadFile("config.json");
-        postEncrStateToServer(hash("fridolin"), getEncrStateFromJson(new JSONObject(file).getJSONObject(hash("fridolin"))).toString());
+        postEncrStateToServer("fridolin", new JSONObject(file).toString());
+
+        List<Entry> list = Manager.JSONObject2List(NetManager.getLatestFromServer("fridolin", "iHaveAids69", getEncrStateFromServer("fridolin")));
+        System.out.println(list.toString());
     }
 }

@@ -68,6 +68,7 @@ public class Entry {
                 "name='" + name + '\'' +
                 ", usr='" + usr + '\'' +
                 ", pwd='" + pwd + '\'' +
+                ", notes='" + notes + '\'' +
                 ", timestamp=" + timestamp +
                 '}';
     }

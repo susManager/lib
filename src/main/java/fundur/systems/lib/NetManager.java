@@ -1,5 +1,6 @@
 package fundur.systems.lib;
 
+import fundur.systems.lib.sec.Encoder;
 import fundur.systems.lib.sec.EncrState;
 import org.json.JSONObject;
 
@@ -44,7 +45,8 @@ public class NetManager {
     }
 
     public static String postEncrStateToServer(String user, String stringified) throws IOException {
-        return postRawToServer(hash(user), "encrstate", Base64.getEncoder().encodeToString(stringified.getBytes()));
+        System.out.println(new String(Encoder.decode(Encoder.encode(stringified.getBytes()))));
+        return postRawToServer(hash(user), "encrstate", Encoder.encode(stringified.getBytes()));
     }
 
     public static String postRawToServer (String hash, String path, String raw) throws IOException {
@@ -65,7 +67,7 @@ public class NetManager {
     }
 
     public static EncrState getEncrStateFromServer(String user) throws IOException {
-        return getEncrStateFromJson(new JSONObject(getRawFromServer(hash(user), "encrstate")));
+        return getEncrStateFromJson(new JSONObject(new String(Encoder.decode(getRawFromServer(hash(user), "encrstate")))));
     }
 
     public static String getLatestRawFromServer(String user) throws IOException {
@@ -83,9 +85,13 @@ public class NetManager {
     }
 
     public static JSONObject getLatestFromServer(String user, String password, String path) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException {
-        String encrypted = getLatestRawFromServer(user);
         String file = loadFile(path + "config.json");
-        EncrState state = getEncrStateFromJson(new JSONObject(file).getJSONObject(hash(user)));
+        EncrState state = getEncrStateFromJson(new JSONObject(file));
+        return getLatestFromServer(user, password, state);
+    }
+
+    public static JSONObject getLatestFromServer(String user, String password, EncrState state) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException {
+        String encrypted = getLatestRawFromServer(hash(user));
         return new JSONObject(decrypt(state.algo(), encrypted, getKeyFromPwd(password, state.salt()), new IvParameterSpec(state.iv())));
     }
 
