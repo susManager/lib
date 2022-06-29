@@ -36,6 +36,10 @@ public class Manager {
                     curr.getLong("timestamp")));
         }
 
+        if (b == null) {
+            return new ArrayList<>(map.values());
+        }
+
         JSONArray jsonB = b.getJSONArray("passwords");
         for (int i = 0; i < jsonB.length(); i++) {
             JSONObject curr = (JSONObject) jsonB.get(i);
@@ -114,7 +118,6 @@ public class Manager {
         postLatestToServer("fridolin", Manager.encrypt(getDefaultDummyJSON(), "", hash("fridolin"), "iHaveAids69"));
         String file = loadFile("config.json");
         postEncrStateToServer("fridolin", new JSONObject(file).toString());
-
         List<Entry> list = Manager.JSONObject2List(NetManager.getLatestFromServer("fridolin", "iHaveAids69", getEncrStateFromServer("fridolin")));
         System.out.println(list.toString());
     }
