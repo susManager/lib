@@ -8,8 +8,6 @@ import java.math.BigInteger;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
-import java.util.Arrays;
-import java.util.Base64;
 
 public final class Security {
     public static SecretKey getKeyFromPwd(String password, byte[] salt) throws NoSuchAlgorithmException, InvalidKeySpecException {
@@ -61,5 +59,17 @@ public final class Security {
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * (Securely) Generate a new EncrState for use when registering
+     * @return the newly generated EncrState
+     */
+    public static EncrState generateNewEncrstate() {
+        return new EncrState(
+                "AES/CBC/PKCS5Padding",
+                "sussymanager(sus)".getBytes(),
+                generateIV().getIV()
+        );
     }
 }
