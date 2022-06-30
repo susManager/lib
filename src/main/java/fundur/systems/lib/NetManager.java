@@ -26,7 +26,7 @@ import static fundur.systems.lib.FileManager.loadFile;
 import static fundur.systems.lib.sec.Security.*;
 
 public class NetManager {
-    public static String serverURL = "http://127.0.0.1:8000/"; //best server imo
+    public static String serverURL = "http://127.0.0.1:6969/"; //best server imo
 
     public static void setServerURL (String newUrl) {
         serverURL = newUrl;
@@ -97,4 +97,7 @@ public class NetManager {
         return new JSONObject(decrypt(state.algo(), encrypted, getKeyFromPwd(password, state.salt()), new IvParameterSpec(state.iv())));
     }
 
+    public static boolean exists(String usr) throws IOException {
+        return getRawFromServer(hash(usr), "exists").equals("yes");
+    }
 }
