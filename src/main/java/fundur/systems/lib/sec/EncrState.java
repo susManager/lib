@@ -1,6 +1,10 @@
 package fundur.systems.lib.sec;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
+
+import java.util.Arrays;
+import java.util.stream.Stream;
 
 public class EncrState {
     private String algo;
@@ -32,5 +36,21 @@ public class EncrState {
         json.put("salt", salt);
         json.put("algo", algo);
         return json.toString();
+    }
+
+    public JSONObject toJSON () {
+        JSONObject json = new JSONObject();
+        json.put("algo", algo());
+        JSONArray iv = new JSONArray();
+        for (byte b : this.iv) {
+            iv.put(b);
+        }
+        json.put("iv", iv);
+        JSONArray salt = new JSONArray();
+        for (byte b : this.salt) {
+            salt.put(b);
+        }
+        json.put("salt", salt);
+        return json;
     }
 }

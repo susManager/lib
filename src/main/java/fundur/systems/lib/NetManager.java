@@ -31,6 +31,7 @@ public class NetManager {
     public static void setServerURL (String newUrl) {
         serverURL = newUrl;
     }
+
     public static boolean testNet() {
         try {
             URL url = new URL(serverURL);
@@ -40,6 +41,7 @@ public class NetManager {
         } catch (Exception ignored) {}
         return false;
     }
+
     public static String postLatestToServer (String user, String encrypted) throws IOException {
         return postRawToServer(hash(user), "data", encrypted);
     }
