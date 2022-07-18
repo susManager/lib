@@ -2,6 +2,7 @@ package fundur.systems.lib;
 
 import fundur.systems.lib.sec.Encoder;
 import fundur.systems.lib.sec.EncrState;
+import fundur.systems.lib.sec.Security;
 import org.json.JSONObject;
 
 import javax.crypto.BadPaddingException;
@@ -15,6 +16,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -46,8 +48,50 @@ public class NetManager {
         return postRawToServer(hash(user), "data", encrypted);
     }
 
+    public static String postSignedToServer (String user, String encrypted, String pwd) throws IOException, GeneralSecurityException {
+        String hash = hash(user);
+        String path = "data";
+
+        URL server = new URL(serverURL + path + "/" +  hash);
+        HttpURLConnection conn = (HttpURLConnection) server.openConnection();
+        conn.setRequestMethod("POST");
+        conn.setDoOutput(true);
+        try (OutputStream os = conn.getOutputStream()) {
+            os.write(String.format("""
+                    {"content": "%s",
+                    "sign": "%s"}
+                    """, encrypted, sign(encrypted, pwd)).getBytes());
+        }
+
+        var br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
+
+        return br.lines().reduce((x, y) -> x + y).get();
+    }
+
+    public static String postEncrSignToServer(String user, EncrState state, String pwd) throws IOException, GeneralSecurityException {
+        String hash = hash(user);
+        String path = "encrstate";
+
+        URL server = new URL(serverURL + path + "/" +  hash);
+        HttpURLConnection conn = (HttpURLConnection) server.openConnection();
+        conn.setRequestMethod("POST");
+        conn.setDoOutput(true);
+        try (OutputStream os = conn.getOutputStream()) {
+            os.write(String.format("""
+                    {"content": "%s",
+                    "sign": "%s"}
+                    """,
+                    Encoder.encode(state.toString().getBytes()),
+                    Encoder.encode(Security.getKeyPair(pwd).getPublic().getEncoded())
+            ).getBytes());
+        }
+
+        var br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
+
+        return br.lines().reduce((x, y) -> x + y).get();
+    }
+
     public static String postEncrStateToServer(String user, String stringified) throws IOException {
-        System.out.println(new String(Encoder.decode(Encoder.encode(stringified.getBytes()))));
         return postRawToServer(hash(user), "encrstate", Encoder.encode(stringified.getBytes()));
     }
 

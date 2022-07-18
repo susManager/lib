@@ -1,13 +1,21 @@
 package fundur.systems.lib.sec;
 
+import fundur.systems.lib.FileManager;
+import fundur.systems.lib.Manager;
+import fundur.systems.lib.NetManager;
+
 import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.math.BigInteger;
+import java.nio.charset.Charset;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
+import java.security.spec.RSAKeyGenParameterSpec;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public final class Security {
     public static SecretKey getKeyFromPwd(String password, byte[] salt) throws NoSuchAlgorithmException, InvalidKeySpecException {
@@ -71,5 +79,47 @@ public final class Security {
                 "sussymanager(sus)".getBytes(),
                 generateIV().getIV()
         );
+    }
+
+    public static String sign(String data, String pwd) throws GeneralSecurityException {
+        KeyPair kp = getKeyPair(pwd);
+        MessageDigest md = MessageDigest.getInstance("SHA-256");
+        byte[] msgHash = md.digest(data.getBytes());
+        Cipher cipher = Cipher.getInstance("RSA");
+        cipher.init(Cipher.ENCRYPT_MODE, kp.getPrivate());
+        byte[] digitalSignature = cipher.doFinal(msgHash);
+        return Encoder.encode(digitalSignature);
+    }
+
+    public static KeyPair getKeyPair(String password) throws GeneralSecurityException {
+        byte[] seed = password.getBytes();
+
+        SecureRandom rnd = SecureRandom.getInstance("SHA1PRNG");
+        rnd.setSeed(seed);
+
+        RSAKeyGenParameterSpec spec = new RSAKeyGenParameterSpec(2048, RSAKeyGenParameterSpec.F4);
+        KeyPairGenerator pairGenerator = KeyPairGenerator.getInstance("RSA");
+        pairGenerator.initialize(spec, rnd);
+
+        return pairGenerator.generateKeyPair();
+    }
+
+    public static void main(String[] args) throws Exception {
+        String encrypted = "this is encrypted text";
+        String pwd = "password";
+        KeyPair kp = getKeyPair(pwd);
+        byte[] msgbytes = encrypted.getBytes();
+        MessageDigest md = MessageDigest.getInstance("SHA-256");
+        byte[] msgHash = md.digest(msgbytes);
+        Cipher cipher = Cipher.getInstance("RSA");
+        cipher.init(Cipher.ENCRYPT_MODE, kp.getPrivate());
+        byte[] digitalSignature = cipher.doFinal(msgHash);
+
+        Cipher cipher2 = Cipher.getInstance("RSA");
+        cipher.init(Cipher.DECRYPT_MODE, kp.getPublic());
+        byte[] decryptedMessageHash = cipher.doFinal(digitalSignature);
+        MessageDigest md1 = MessageDigest.getInstance("SHA-256");
+        byte[] newMessageHash = md.digest(msgbytes);
+        System.out.println(Arrays.equals(decryptedMessageHash, newMessageHash));
     }
 }
