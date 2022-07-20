@@ -116,10 +116,10 @@ public final class Security {
         byte[] digitalSignature = cipher.doFinal(msgHash);
 
         Cipher cipher2 = Cipher.getInstance("RSA");
-        cipher.init(Cipher.DECRYPT_MODE, kp.getPublic());
-        byte[] decryptedMessageHash = cipher.doFinal(digitalSignature);
+        cipher2.init(Cipher.DECRYPT_MODE, kp.getPublic());
+        byte[] decryptedMessageHash = cipher2.doFinal(digitalSignature);
         MessageDigest md1 = MessageDigest.getInstance("SHA-256");
-        byte[] newMessageHash = md.digest(msgbytes);
+        byte[] newMessageHash = md1.digest(msgbytes);
         System.out.println(Arrays.equals(decryptedMessageHash, newMessageHash));
     }
 }
